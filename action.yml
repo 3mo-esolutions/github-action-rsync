@@ -1,0 +1,33 @@
+name: Rsync
+description: A GitHub Action to sync files via rsync
+
+inputs:
+  SERVER:
+    description: 'The server to connect to'
+    required: true
+  SSH_KEY:
+    description: 'The SSH private key to use for authentication'
+    required: true
+  SOURCE:
+    description: 'The source directory to sync'
+    required: true
+  TARGET:
+    description: 'The target directory to sync'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - id: parse
+      uses: 3mo-esolutions/github-action-parse-server-credentials@0.1.0
+      with:
+        SERVER: ${{inputs.SERVER}}
+    - uses: burnett01/rsync-deployments@7.0.1
+      with:
+        switches: -avzr
+        path: ${{inputs.SOURCE}}
+        remote_path: ${{inputs.TARGET}}
+        remote_user: ${{steps.parse.outputs.USERNAME}}
+        remote_host: ${{steps.parse.outputs.HOST}}
+        remote_port: ${{steps.parse.outputs.PORT}}
+        remote_key: ${{inputs.SSH_KEY}}
